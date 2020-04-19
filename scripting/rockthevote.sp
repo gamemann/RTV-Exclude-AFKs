@@ -267,7 +267,13 @@ void AttemptRTV(int client)
 	{
 		ReplyToCommand(client, "[SM] %t", "Already Voted", g_Votes, g_VotesNeeded);
 		return;
-	}	
+	}
+
+	if (AFKM_IsClientAFK(client))
+	{
+		ReplyToCommand(client, "[SM] AFK players cannot RTV.");
+		return;
+	}
 	
 	char name[MAX_NAME_LENGTH];
 	GetClientName(client, name, sizeof(name));
