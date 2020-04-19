@@ -1,4 +1,4 @@
-# RTV (Exclude Spectators)
+# RTV (Exclude AFKs)
 
 ## Description
 A simple modification to AlliedMod's default Rock The Vote plugin. This plugin excludes AFK players based off of the AFK Manager plugin located [here](https://forums.alliedmods.net/showthread.php?p=708265). It uses forwards provided by the AFK Manager plugin.
