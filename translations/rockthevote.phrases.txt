@@ -72,4 +72,9 @@
 		"#format"		"{1:s}"
 		"en"			"Changing map to {1}! Rock the Vote has spoken!"
 	}
+
+    "Is AFK"
+    {
+        "en"            "AFK players cannot RTV."
+    }
 }

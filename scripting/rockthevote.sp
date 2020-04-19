@@ -271,7 +271,7 @@ void AttemptRTV(int client)
 
 	if (AFKM_IsClientAFK(client))
 	{
-		ReplyToCommand(client, "[SM] AFK players cannot RTV.");
+		ReplyToCommand(client, "[SM] %t", "Is AFK");
 		return;
 	}
 	
