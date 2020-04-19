@@ -34,6 +34,7 @@
 #include <sourcemod>
 #include <mapchooser>
 #include <nextmap>
+#include <afk_manager>
 
 #pragma semicolon 1
 #pragma newdecls required
@@ -41,8 +42,8 @@
 public Plugin myinfo =
 {
 	name = "Rock The Vote",
-	author = "AlliedModders LLC",
-	description = "Provides RTV Map Voting",
+	author = "AlliedModders LLC, Christian Deacon (Roy)",
+	description = "Provides RTV Map Voting. Modified to exclude AFKs.",
 	version = SOURCEMOD_VERSION,
 	url = "http://www.sourcemod.net/"
 };
@@ -59,6 +60,7 @@ int g_Voters = 0;				// Total voters connected. Doesn't include fake clients.
 int g_Votes = 0;				// Total number of "say rtv" votes
 int g_VotesNeeded = 0;			// Necessary votes before map vote begins. (voters * percent_needed)
 bool g_Voted[MAXPLAYERS+1] = {false, ...};
+bool g_DidVote[MAXPLAYERS+1] = {false, ...};
 
 bool g_InChange = false;
 
@@ -104,6 +106,72 @@ public void OnConfigsExecuted()
 	CreateTimer(g_Cvar_InitialDelay.FloatValue, Timer_DelayRTV, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
+public void AFKM_OnClientAFK(int client)
+{
+	// Check if client RTV'd already. If so, remove vote and set g_DidVote to true.
+	if (g_Voted[client])
+	{
+		g_Votes--;
+		g_Voted[client] = false;
+
+		g_DidVote[client] = true;
+	}
+
+	// Check if client is a bot and if not, remove one from voters and recalculate.
+	if (!IsFakeClient(client))
+	{
+		g_Voters--;
+		g_VotesNeeded = RoundToCeil(float(g_Voters) * g_Cvar_Needed.FloatValue);
+	}
+
+	// See if RTV passed.
+	if (g_Votes && 
+		g_Voters && 
+		g_Votes >= g_VotesNeeded && 
+		g_RTVAllowed ) 
+	{
+		if (g_Cvar_RTVPostVoteAction.IntValue == 1 && HasEndOfMapVoteFinished())
+		{
+			return;
+		}
+		
+		StartRTV();
+	}	
+}
+
+public void AFKM_OnClientBack(int client)
+{
+	// Check if they RTV'd before becoming AFK. If so, add back their vote.
+	if (g_DidVote[client])
+	{
+		g_Votes++;
+		g_Voted[client] = true;
+
+		g_DidVote[client] = false;
+	}
+
+	// Check if client is a bot. If not, add one to voters and recalculate.
+	if (!IsFakeClient(client))
+	{
+		g_Voters++;
+		g_VotesNeeded = RoundToCeil(float(g_Voters) * g_Cvar_Needed.FloatValue);
+	}
+
+	// See if RTV passed.
+	if (g_Votes && 
+		g_Voters && 
+		g_Votes >= g_VotesNeeded && 
+		g_RTVAllowed ) 
+	{
+		if (g_Cvar_RTVPostVoteAction.IntValue == 1 && HasEndOfMapVoteFinished())
+		{
+			return;
+		}
+		
+		StartRTV();
+	}	
+}
+
 public void OnClientConnected(int client)
 {
 	if (!IsFakeClient(client))
@@ -119,6 +187,11 @@ public void OnClientDisconnect(int client)
 	{
 		g_Votes--;
 		g_Voted[client] = false;
+	}
+
+	if (g_DidVote[client])
+	{
+		g_DidVote[client] = false;
 	}
 	
 	if (!IsFakeClient(client))
