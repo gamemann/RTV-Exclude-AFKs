@@ -11,7 +11,7 @@ A simple modification to AlliedMod's default Rock The Vote plugin. This plugin e
 
 ### Compiling The Plugin
 * SourceMod >= 1.10.0
-* `afk_manager.inc` file should be in the `scripting/include/` directory. Thie file can be found [here](https://forums.alliedmods.net/showthread.php?p=708265).
+* `afk_manager.inc` file should be in the `scripting/include/` directory. This file can be found [here](https://forums.alliedmods.net/showthread.php?p=708265).
 
 ## Credits
 * AlliedMods - Created the base Rock The Vote plugin.
